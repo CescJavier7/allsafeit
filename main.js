@@ -1,8 +1,28 @@
 document.addEventListener('DOMContentLoaded', function() {
     
+    // Lógica para el Menú Móvil Funcional
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (navLinks.classList.contains('active')) {
+                    menuToggle.classList.remove('active');
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+    }
+
     // --- HERO INTERACTIVO (SPOTLIGHT) ---
     const hero = document.querySelector('.hero');
-    if (hero && window.matchMedia("(min-width: 768px)").matches) { // Solo en desktop
+    if (hero && window.matchMedia("(min-width: 1024px)").matches) {
         hero.addEventListener('mousemove', e => {
             const rect = hero.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -14,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- EFECTO 3D (TILT) EN TARJETAS ---
-    if (window.matchMedia("(min-width: 768px)").matches) { // Solo en desktop
+    if (window.matchMedia("(min-width: 1024px)").matches) {
         const tiltCards = document.querySelectorAll('.card, .tech-card');
         tiltCards.forEach(card => {
             card.addEventListener('mousemove', (e) => {
@@ -26,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const rotateX = (y / height - 0.5) * -14;
                 const rotateY = (x / width - 0.5) * 14;
 
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`; // Pequeño scale para efecto
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`;
             });
 
             card.addEventListener('mouseleave', () => {
@@ -37,38 +57,43 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // --- EFECTO DE CURSOR PERSONALIZADO ---
     const cursorFollower = document.querySelector('.cursor-follower');
-    if (window.matchMedia("(min-width: 768px)").matches) { // Solo en desktop
+    if (cursorFollower && window.matchMedia("(min-width: 1024px)").matches) {
         window.addEventListener('mousemove', e => {
-            cursorFollower.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+            cursorFollower.style.transform = `translate3d(${e.clientX - 15}px, ${e.clientY - 15}px, 0)`;
         });
-        document.querySelectorAll('a, .btn, .card, .tech-card').forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                cursorFollower.classList.add('active');
-            });
-            el.addEventListener('mouseleave', () => {
-                cursorFollower.classList.remove('active');
-            });
+        document.querySelectorAll('a, .btn, .card, .tech-card, .menu-toggle').forEach(el => {
+            el.addEventListener('mouseenter', () => cursorFollower.classList.add('active'));
+            el.addEventListener('mouseleave', () => cursorFollower.classList.remove('active'));
         });
-    } else {
-        cursorFollower.style.display = 'none'; // Ocultar en dispositivos táctiles
+    } else if (cursorFollower) {
+        cursorFollower.style.display = 'none';
     }
 
     // --- EFECTO DE ESCRITURA ---
     const typingText = document.querySelector('.typing-text');
-    if(typingText) {
-        const words = ["Soluciones.", "Innovación.", "Confianza."]; // Palabras clave adaptadas
+    if (typingText) {
+        const words = ["Soluciones.", "Innovación.", "Confianza."];
         let wordIndex = 0, charIndex = 0, isDeleting = false;
+        
         function type() {
-            if (!typingText) return; // Asegura que el elemento existe
+            if (!typingText) return;
             const currentWord = words[wordIndex];
-            let displayText = isDeleting ? currentWord.substring(0, charIndex - 1) : currentWord.substring(0, charIndex + 1);
+            const displayText = isDeleting 
+                ? currentWord.substring(0, charIndex - 1) 
+                : currentWord.substring(0, charIndex + 1);
+            
             typingText.textContent = displayText;
-            let typeSpeed = isDeleting ? 90 : 180; // Ajuste de velocidad
+            let typeSpeed = isDeleting ? 90 : 180;
+
             if (!isDeleting && charIndex === currentWord.length) {
-                typeSpeed = 2000; isDeleting = true;
+                typeSpeed = 2000;
+                isDeleting = true;
             } else if (isDeleting && charIndex === 0) {
-                isDeleting = false; wordIndex = (wordIndex + 1) % words.length; typeSpeed = 400;
+                isDeleting = false;
+                wordIndex = (wordIndex + 1) % words.length;
+                typeSpeed = 400;
             }
+            
             charIndex = isDeleting ? charIndex - 1 : charIndex + 1;
             setTimeout(type, typeSpeed);
         }
@@ -77,39 +102,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- ANIMACIONES DE SCROLL (INTERSECTION OBSERVER API) ---
     const hiddenElements = document.querySelectorAll('.hidden');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                // observer.unobserve(entry.target); // Desactivar si solo quieres que la animación ocurra una vez
-            } else {
-                // entry.target.classList.remove('visible'); // Opcional: para que se oculten al salir de la vista
-            }
+    if (hiddenElements.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { 
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
         });
-    }, { 
-        threshold: 0.1, // Elemento visible en un 10%
-        rootMargin: '0px 0px -50px 0px' // Cargar un poco antes de llegar al final
-    });
-    hiddenElements.forEach((el) => observer.observe(el));
+        hiddenElements.forEach((el) => observer.observe(el));
+    }
 
     // --- NAVEGACIÓN ACTIVA AL HACER SCROLL ---
-    const sections = document.querySelectorAll('section');
-    const navLinks = document.querySelectorAll('.nav-links a');
-    window.addEventListener('scroll', () => {
-        let current = 'home';
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            // Ajustar el offset para que la sección se active un poco antes
-            if (pageYOffset >= sectionTop - (window.innerHeight / 2)) {
-                current = section.getAttribute('id');
-            }
+    const sections = document.querySelectorAll('section[id]');
+    if (sections.length > 0) {
+        const navLinksObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-links a').forEach(a => {
+                        a.classList.remove('active');
+                        if (a.getAttribute('href') === `#${id}`) {
+                            a.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, { 
+            rootMargin: '-50% 0px -50% 0px'
         });
-        navLinks.forEach(a => {
-            a.classList.remove('active');
-            if (a.getAttribute('href').substring(1) === current) {
-                a.classList.add('active');
-            }
-        });
-    });
+        sections.forEach(section => navLinksObserver.observe(section));
+    }
 });
