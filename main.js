@@ -20,14 +20,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // --- ANIMACIONES DE SCROLL (PARA TODOS LOS DISPOSITIVOS) ---
+    const hiddenElements = document.querySelectorAll('.hidden');
+    if (hiddenElements.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { 
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        hiddenElements.forEach((el) => observer.observe(el));
+    }
+
     // ==========================================================================
-    // OPTIMIZACIÓN MÁXIMA PARA MÓVILES
+    // EFECTOS SOLO PARA ESCRITORIO (MEJORA DE RENDIMIENTO)
     // ==========================================================================
     
-    // Comprobamos si la pantalla es de escritorio (mayor a 768px)
-    const isDesktop = window.matchMedia("(min-width: 769px)").matches;
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
 
-    // Solo ejecutamos las animaciones y efectos visuales costosos en escritorio
     if (isDesktop) {
         // --- HERO INTERACTIVO (SPOTLIGHT) ---
         const hero = document.querySelector('.hero');
@@ -74,32 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // --- ANIMACIONES DE SCROLL (SOLO PARA ESCRITORIO) ---
-        const hiddenElements = document.querySelectorAll('.hidden');
-        if (hiddenElements.length > 0) {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { 
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            });
-            hiddenElements.forEach((el) => observer.observe(el));
-        }
-
     } else {
-        // --- ACCIÓN PARA MÓVILES: ELIMINAR TODAS LAS ANIMACIONES ---
-        // Hacemos que todos los elementos con la clase '.hidden' sean visibles inmediatamente.
-        // Esto mejora el rendimiento y evita cualquier conflicto de layout por las animaciones.
-        const hiddenElements = document.querySelectorAll('.hidden');
-        hiddenElements.forEach(el => {
-            el.classList.remove('hidden');
-        });
-
-        // Ocultamos el seguidor de cursor personalizado en móviles
         const cursorFollower = document.querySelector('.cursor-follower');
         if (cursorFollower) {
             cursorFollower.style.display = 'none';
